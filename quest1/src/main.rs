@@ -13,6 +13,9 @@ fn main() -> anyhow::Result<()> {
     let input = read_input("everybody_codes_e2025_q01_p2.txt")?;
     let result = part2(&input)?;
     println!("{result}");
+    let input = read_input("everybody_codes_e2025_q01_p3.txt")?;
+    let result = part3(&input)?;
+    println!("{result}");
     Ok(())
 }
 
@@ -38,27 +41,6 @@ struct Instruction {
     direction: Direction,
     steps: i32,
 }
-
-// Ryththyris
-// fn part1(input: &str) -> anyhow::Result<String> {
-//     let mut inp = input;
-//     let input_data = parse_input_data(&mut inp).map_err(|e| anyhow!("{e}"))?;
-//     let mut idx = 0;
-//     let size = input_data.names.len() as i32;
-//     for instruction in input_data.instructions.iter() {
-//         match instruction.direction {
-//             Direction::Left => idx -= instruction.steps ,
-//             Direction::Right => idx += instruction.steps,
-//         }
-//         if idx < 0 {
-//             idx = 0;
-//         }
-//         if idx >= size {
-//             idx = size - 1;
-//         }
-//     }
-//     Ok(input_data.names[idx as usize].clone())
-// }
 
 fn part1(input: &str) -> anyhow::Result<String> {
     let mut inp = input;
@@ -87,6 +69,20 @@ fn part2(input: &str) -> anyhow::Result<String> {
             Direction::Right => (idx + instruction.steps).rem_euclid(size),
         }) as usize;
     Ok(input_data.names[idx].clone())
+}
+
+fn part3(input: &str) -> anyhow::Result<String> {
+    let mut inp = input;
+    let mut input_data = parse_input_data(&mut inp).map_err(|e| anyhow!("{e}"))?;
+    let size = input_data.names.len() as i32;
+    for instruction in input_data.instructions.iter() {
+        let idx = match instruction.direction {
+            Direction::Left => (-instruction.steps).rem_euclid(size),
+            Direction::Right => (instruction.steps).rem_euclid(size),
+        };
+        input_data.names.swap(0, idx as usize);
+    }
+    Ok(input_data.names.first().cloned().unwrap())
 }
 
 fn clamp(n: i32, min: i32, max: i32) -> i32 {
@@ -144,5 +140,10 @@ R3,L2,R3,L1"#;
     #[test]
     fn part2_works() {
         assert_eq!(part2(INPUT).expect("no error"), "Elarzris");
+    }
+
+    #[test]
+    fn part3_works() {
+        assert_eq!(part3(INPUT).expect("no error"), "Fyrryn");
     }
 }
