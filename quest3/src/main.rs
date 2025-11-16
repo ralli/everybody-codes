@@ -49,18 +49,18 @@ fn part2(input: &str) -> anyhow::Result<i32> {
     let start = size - 20;
     let bla = &crates[start..];
     assert_eq!(bla.len(), 20);
-    Ok((&crates[start..]).iter().sum())
+    Ok((crates[start..]).iter().sum())
 }
 
 fn part3(input: &str) -> anyhow::Result<usize> {
     let mut inp = input;
-    let mut crates = parse_input_data(&mut inp).map_err(|e| anyhow!("{e}"))?;
+    let crates = parse_input_data(&mut inp).map_err(|e| anyhow!("{e}"))?;
     let hist: BTreeMap<i32, usize> = crates.into_iter().fold(BTreeMap::new(), |mut acc, x| {
         let e = acc.entry(x).or_default();
         *e += 1;
         acc
     });
-    Ok(hist.values().into_iter().max().copied().unwrap_or_default())
+    Ok(hist.values().max().copied().unwrap_or_default())
 }
 
 #[cfg(test)]

@@ -26,8 +26,7 @@ fn part1(input: &str) -> anyhow::Result<Complex> {
     let n = (0..3).fold(Complex { x: 0, y: 0 }, |r, _| {
         let x = r.mul(&r);
         let x = x.div(&ten);
-        let x = x.add(&a);
-        x
+        x.add(&a)
     });
     Ok(n)
 }
@@ -78,7 +77,7 @@ fn should_plot(p: &Complex) -> bool {
     for _i in 1..=100 {
         r = r.mul(&r);
         r = r.div(&divisor);
-        r = r.add(&p);
+        r = r.add(p);
         if !(-1_000_000..=1_000_000).contains(&r.x) || !(-1_000_000..=1_000_000).contains(&r.y) {
             // println!("p={p} r={r} c={i}");
             return false;

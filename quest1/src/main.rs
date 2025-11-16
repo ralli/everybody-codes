@@ -3,7 +3,7 @@ use std::path::Path;
 use winnow::{
     ModalResult, Parser,
     ascii::{alpha1, digit1, line_ending},
-    combinator::{alt, repeat, separated},
+    combinator::{alt, separated},
 };
 
 fn main() -> anyhow::Result<()> {
@@ -119,10 +119,6 @@ fn parse_int(input: &mut &str) -> ModalResult<i32> {
 fn parse_direction(input: &mut &str) -> ModalResult<Direction> {
     alt(('L'.value(Direction::Left), 'R'.value(Direction::Right))).parse_next(input)
 }
-
-const INPUT: &str = r#"Vyrdax,Drakzyph,Fyrryn,Elarzris
-
-R3,L2,R3,L1"#;
 
 #[cfg(test)]
 mod tests {
