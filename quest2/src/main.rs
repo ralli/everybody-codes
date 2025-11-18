@@ -156,14 +156,14 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        let mut input = "A=[35300,-64910]";
+        let input = "A=[35300,-64910]";
         let result = part2(input).expect("should work");
         assert_eq!(result, 4076);
     }
 
     #[test]
     fn test_part3() {
-        let mut input = "A=[35300,-64910]";
+        let input = "A=[35300,-64910]";
         let result = part3(input).expect("should work");
         assert_eq!(result, 406954);
     }
