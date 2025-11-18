@@ -55,6 +55,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "quest6"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
+
+[[package]]
 name = "winnow"
 version = "0.7.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
