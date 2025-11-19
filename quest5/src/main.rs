@@ -68,7 +68,7 @@ fn part3(input: &str) -> anyhow::Result<i64> {
         .map(|(i, d)| (i, d.id))
         .inspect(|(i, v)| println!("Sword {}: {}", i + 1, v))
         .map(|(i, v)| ((i + 1) as i64) * v)
-        .fold(0, |acc, v| acc + v);
+        .sum::<i64>();
     Ok(result)
 }
 
@@ -119,8 +119,8 @@ impl Fishbone {
         for v in self.values.iter().map(|(_, v, _)| *v) {
             s.push_str(&v.to_string());
         }
-        let result = s.parse::<i64>().expect("cannot parse i64");
-        result
+        
+        s.parse::<i64>().expect("cannot parse i64")
     }
 }
 
@@ -147,7 +147,7 @@ fn compare_swords(s1: &SwordData, s2: &SwordData) -> Ordering {
 }
 
 fn fishbone_values(items: &[Item]) -> Vec<i64> {
-    items.iter().map(|item| fishbone_value(item)).collect()
+    items.iter().map(fishbone_value).collect()
 }
 
 fn fishbone_value(item: &Item) -> i64 {
@@ -160,8 +160,8 @@ fn fishbone_value(item: &Item) -> i64 {
     if let Some(v) = v3 {
         s.push_str(&v.to_string());
     }
-    let result = s.parse::<i64>().expect("cannot parse");
-    result
+    
+    s.parse::<i64>().expect("cannot parse")
 }
 
 fn parse_sword_data_list(input: &mut &str) -> ModalResult<Vec<SwordData>> {

@@ -1,12 +1,6 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-macro_rules! full_input {
-    ($p: expr) => {
-        terminated($p, (multispace0, eof))
-    };
-}
-
 fn main() -> anyhow::Result<()> {
     let input = read_file("everybody_codes_e2025_q06_p1.txt")?;
     let result = part1(&input)?;

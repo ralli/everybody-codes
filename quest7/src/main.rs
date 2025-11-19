@@ -37,8 +37,7 @@ fn part1(input: &str) -> anyhow::Result<String> {
     let result = input_data
         .names
         .into_iter()
-        .filter(|name| matches_word(name, &input_data.adj))
-        .next()
+        .find(|name| matches_word(name, &input_data.adj))
         .ok_or_else(|| anyhow!("No matching word found"))?;
     Ok(result)
 }
@@ -52,9 +51,9 @@ fn part2(input: &str) -> anyhow::Result<usize> {
         .names
         .iter()
         .enumerate()
-        .filter(|(idx, name)| matches_word(name, &input_data.adj))
+        .filter(|(_idx, name)| matches_word(name, &input_data.adj))
         .map(|(idx, _name)| idx + 1)
-        .fold(0, |acc, idx| acc + idx);
+        .sum::<usize>();
     Ok(result)
 }
 
@@ -127,7 +126,7 @@ fn parse_names(input: &mut &str) -> ModalResult<Vec<String>> {
 fn parse_adj_list(input: &mut &str) -> ModalResult<BTreeMap<char, Vec<char>>> {
     let entries: Vec<(char, Vec<char>)> =
         separated(1.., parse_adj_entry, line_ending).parse_next(input)?;
-    let result = BTreeMap::from_iter(entries.into_iter());
+    let result = BTreeMap::from_iter(entries);
     Ok(result)
 }
 
