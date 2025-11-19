@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fs::read_to_string;
 use std::path::Path;
 use winnow::ModalResult;
@@ -8,6 +9,14 @@ use winnow::combinator::{eof, separated, terminated};
 fn main() -> anyhow::Result<()> {
     let input = read_to_string("everybody_codes_e2025_q08_p1.txt")?;
     let result = part1(&input)?;
+    println!("{result}");
+
+    let input = read_to_string("everybody_codes_e2025_q08_p2.txt")?;
+    let result = part2(&input)?;
+    println!("{result}");
+
+    let input = read_to_string("everybody_codes_e2025_q08_p3.txt")?;
+    let result = part3_2(&input);
     println!("{result}");
 
     Ok(())
@@ -33,31 +42,116 @@ fn part2(input: &str) -> anyhow::Result<usize> {
     let input_data = terminated(parse_int_list, (multispace0, eof))
         .parse_next(&mut inp)
         .map_err(|err| anyhow::anyhow!(err))?;
-    let max_number = input_data.iter().max().copied().unwrap_or_default();
     let mut result = 0;
 
-    for (i, w1) in input_data
-        .as_slice()
-        .windows(2).enumerate() {
-        for w2 in input_data
-            .as_slice()
-            .windows(2).skip(i+1) {
-            if overlaps((w1[0], w1[1]), (w2[0], w2[1]), max_number) {
-                result += 1;
+    let mut links: BTreeMap<i32, Vec<i32>> = BTreeMap::new();
+    for w in input_data.as_slice().windows(2) {
+        let v1 = w[0].min(w[1]);
+        let v2 = w[0].max(w[1]);
+        links.entry(v1).or_default().push(v2);
+    }
+    let mut freq: BTreeMap<i32, usize> = BTreeMap::new();
+
+    for (start, ends) in links.iter() {
+        for &end in ends {
+            for i in start + 1..end {
+                result += freq.get(&i).copied().unwrap_or_default();
             }
         }
+
+        for &end in ends {
+            let mut e = freq.entry(end).or_default();
+            *e += 1;
+        }
     }
+
     Ok(result)
 }
 
-fn overlaps((p1, p2): (i32, i32), (p3, p4): (i32, i32), max_num: i32) -> bool {
-    let (p1, p2) = (p1.min(p2), p1.max(p2));
-    let (p3, p4) = (p3.min(p4), p3.max(p4));
+pub fn part3_2(notes: &str) -> i32 {
+    let mut links = vec![vec![]; 257];
+    let mut delta = vec![0; 258];
+    let mut result = 0;
+    let mut inp = notes;
+    let input_data = terminated(parse_int_list, (multispace0, eof))
+        .parse_next(&mut inp)
+        .unwrap();
+    let parsed: Vec<_> = input_data
+        .as_slice()
+        .windows(2)
+        .map(|w| (w[0].min(w[1]) as usize, w[0].max(w[1]) as usize))
+        .collect();
 
-    let (i1, i2) = (p1, p2);
-    let (i3, i4) = (p2, p1 + max_num);
+    for (start, end) in parsed {
+        links[start].push(end);
+        delta[start + 1] += 1;
+        delta[end] -= 1;
+    }
 
-    (i1 < p3 && i2 > p3 && i3 < p4 && i4 > p4) || (i1 < p4 && i2 > p4 && i3 < p3 && i4 > p4)
+    for start in 1..255 {
+        for &end in &links[start] {
+            delta[end] += 2;
+            delta[end + 1] -= 1;
+        }
+
+        for &end in &links[start - 1] {
+            delta[end] -= 1;
+            delta[end + 1] += 2;
+        }
+
+        let mut cuts = 0;
+
+        for &next in &delta[start + 2..257] {
+            cuts += next;
+            result = result.max(cuts);
+        }
+    }
+
+    result
+}
+
+pub fn part3(input: &str) -> anyhow::Result<i32> {
+    let mut inp = input;
+    let input_data = terminated(parse_int_list, (multispace0, eof))
+        .parse_next(&mut inp)
+        .map_err(|err| anyhow::anyhow!(err))?;
+    let mut delta: BTreeMap<i32, i32> = BTreeMap::new();
+    let mut result = 0;
+
+    let mut links: BTreeMap<i32, Vec<i32>> = BTreeMap::new();
+    for w in input_data.as_slice().windows(2) {
+        let v1 = w[0].min(w[1]);
+        let v2 = w[0].max(w[1]);
+        links.entry(v1).or_default().push(v2);
+        *delta.entry(v1).or_default() += 1;
+        *delta.entry(v2).or_default() -= 1;
+    }
+
+    let max_value = input_data.iter().max().copied().unwrap_or_default();
+    let empty_vec: Vec<i32> = Vec::new();
+    for start in 1..max_value {
+        let ends = links.get(&start).unwrap_or(&empty_vec);
+        for &end in ends.iter() {
+            *delta.entry(end).or_default() += 2;
+            *delta.entry(end + 1).or_default() -= 1;
+        }
+
+        let ends = links.get(&(start - 1)).unwrap_or(&empty_vec);
+        for &end in ends.iter() {
+            *delta.entry(end).or_default() -= 1;
+            *delta.entry(end + 1).or_default() += 2;
+        }
+
+        let mut cuts = 0;
+
+        for i in (start + 2..=max_value) {
+            let next = delta.get(&i).copied().unwrap_or_default();
+            cuts += next;
+            result = result.max(cuts);
+        }
+    }
+
+    Ok(result)
 }
 
 fn parse_int_list(input: &mut &str) -> ModalResult<Vec<i32>> {
@@ -78,13 +172,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_overlaps() {
-        // assert!(!overlaps((1,5), (2,5), 8));
-        // assert!(overlaps((1,5), (2,6), 8));
-        assert!(overlaps((8,4), (1,5), 8));
-        assert!(overlaps((8,4), (2,6), 8));
-    }
-    #[test]
     fn test_part1() {
         let input = "1,5,2,6,8,4,1,7,3";
         let result = part1(input).unwrap();
@@ -96,5 +183,12 @@ mod tests {
         let input = "1,5,2,6,8,4,1,7,3,5,7,8,2";
         let result = part2(input).unwrap();
         assert_eq!(result, 21);
+    }
+
+    #[test]
+    fn test_part3() {
+        let input = "1,5,2,6,8,4,1,7,3,6";
+        let result = part3(input).unwrap();
+        assert_eq!(result, 7);
     }
 }
