@@ -1,5 +1,5 @@
 [workspace]
 resolver = "3"
-members = ["quest1", "quest2", "quest3", "quest4", "quest5", "quest6", "quest7", "quest8"]
+members = ["quest1", "quest2", "quest3", "quest4", "quest5", "quest6", "quest7", "quest8", "quest9"]
 
 
